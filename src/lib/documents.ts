@@ -27,11 +27,18 @@ export async function createDocument(userId: string, input: unknown) {
   const data = createSchema.parse(input);
   return db.document.create({ data: { title: data.title, contentJson: data.contentJson as Prisma.InputJsonValue, ownerId: userId }, include });
 }
+// Raw SQL must name the schema: transaction poolers (Supabase port 6543) do not keep
+// the search_path Prisma sets per connection, so an unqualified table is not found.
+function documentTable() {
+  const schema = process.env.DATABASE_URL ? new URL(process.env.DATABASE_URL).searchParams.get("schema") ?? "public" : "public";
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(schema)) throw new Error("Invalid schema name in DATABASE_URL.");
+  return Prisma.raw(`"${schema}"."Document"`);
+}
 // All writes lock the same document row, including sharing changes. Access is re-read
 // after acquiring the lock, so a concurrent revocation cannot race an edit.
 async function withDocument<T>(userId: string, id: string, work: (tx: Prisma.TransactionClient, doc: Loaded, role: string) => Promise<T>) {
   return db.$transaction(async tx => {
-    await tx.$queryRaw`SELECT "id" FROM "Document" WHERE "id" = ${id} FOR UPDATE`;
+    await tx.$queryRaw`SELECT "id" FROM ${documentTable()} WHERE "id" = ${id} FOR UPDATE`;
     const doc = visible(await tx.document.findUnique({ where: { id }, include }), userId);
     return work(tx, doc, doc.role);
   }, { maxWait: 10_000, timeout: 15_000 });
