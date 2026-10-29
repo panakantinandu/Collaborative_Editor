@@ -34,7 +34,7 @@ async function withDocument<T>(userId: string, id: string, work: (tx: Prisma.Tra
     await tx.$queryRaw`SELECT "id" FROM "Document" WHERE "id" = ${id} FOR UPDATE`;
     const doc = visible(await tx.document.findUnique({ where: { id }, include }), userId);
     return work(tx, doc, doc.role);
-  });
+  }, { maxWait: 10_000, timeout: 15_000 });
 }
 export async function updateDocument(userId: string, id: string, input: unknown) {
   const data = updateSchema.parse(input);
