@@ -1,8 +1,8 @@
 # Draftly submission
 
-Live URL: **TODO — not deployed or verified**
+Live URL: **https://collaborative-editor-neon-alpha.vercel.app**
 
-Walkthrough URL: **TODO — not recorded or verified**
+Walkthrough URL: **TODO — add the uploaded video link**
 
 ## Delivered source
 
@@ -36,6 +36,7 @@ Verified on October 29, 2026:
 | Production HTTP smoke check | Dashboard and document-editor routes both returned **200**; dashboard HTML referenced its stylesheet |
 | Supabase configuration inspection | Confirmed the runtime uses `draftly_app` in private `draftly` schema; RLS enabled on all three application tables |
 | npm dependency audit during final installation | **0 vulnerabilities reported** |
+| Vercel production deployment (October 29, 2026) | Functions run in `pdx1`, next to the us-west-2 Supabase database. `npm run test:integration` with `TEST_BASE_URL` set to the live URL: **26 checks passed** against the deployment |
 | Browser visual walkthrough | **Not completed**: the browser host was unavailable, and native Computer Use later stopped because it could not reliably verify Chrome's current URL |
 
 All mandatory automated checks passed. Browser/manual visual verification is not implied by those results. The temporary verification servers were stopped; the Supabase-backed `.env` remains configured locally and is ignored by version control.
@@ -46,7 +47,6 @@ From this configured Windows workspace, run `npm.cmd run dev`, then open **http:
 
 ## Deliberately incomplete / excluded
 
-- Live Vercel deployment and walkthrough recording are not supplied; placeholders remain.
 - Production authentication, real-time simultaneous editing, CRDTs, email delivery, attachment storage, DOCX import and document deletion are not implemented.
 - No claim of exhaustive browser/mobile/accessibility auditing is made.
 - The dashboard returns at most 100 matching documents. No pagination or content search.

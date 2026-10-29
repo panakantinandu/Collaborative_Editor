@@ -25,10 +25,19 @@ Browser automation was attempted through the supported UI tools. The browser acc
 
 Official Next.js, Tiptap, Prisma and Supabase documentation was consulted. Next.js-generated repository guidance was read when it appeared. The Sites skill informed local implementation and preview workflow; the brief's explicit Next.js/Prisma/Supabase/Vercel requirements took precedence over the Sites-hosted stack.
 
+## Deployment and production fixes
+
+The assistant pushed the repository to GitHub, linked the Vercel project and connected it to the repository. The user entered the production environment variables in Vercel. Production checks then found three problems, which were fixed:
+
+- `APP_ORIGIN` pointed at a Vercel domain owned by another project, so every mutation was rejected with 403. It was changed to the real production domain.
+- Saves and sharing changes failed intermittently with 500. The row-lock query `SELECT ... FOR UPDATE` was raw SQL without a schema name. Supabase's transaction pooler does not keep the `search_path` Prisma sets, so the query sometimes failed with `relation "Document" does not exist` (16 of 30 concurrent attempts in a local reproduction). The query is now schema-qualified, the functions run in `pdx1` next to the database, and the transaction time limits were raised.
+- Opening a document as a viewer showed a 403 save error. Tiptap's trailing-node plugin changes a document that ends in a list, which triggered autosave. Updates are now ignored while the editor is read-only.
+
+After the fixes, all 26 integration checks passed against the live deployment.
+
 ## Human input still required
 
 - TODO: Review the demo-authentication tradeoff and the acceptance scenario.
-- TODO: Configure the repository and Vercel project, deploy, verify its URL and environment-specific origin, then replace the live URL placeholder.
 - TODO: Record and publish a walkthrough video, then replace its placeholder. No recording has been made.
 - TODO: Perform manual visual, keyboard and responsive-browser review if automation remains unavailable.
 - TODO: Replace demo account selection with production authentication before storing real data or launching a real product.

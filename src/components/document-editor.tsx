@@ -43,7 +43,8 @@ function EditorSurface({ initial }: { initial: Document }) {
     extensions: [...editorExtensions, Placeholder.configure({ placeholder: "Let your ideas find their words…" })],
     content: initial.contentJson, immediatelyRender: false, editable,
     editorProps: { attributes: { class: "writing-content", role: "textbox", "aria-label": "Document content", "aria-multiline": "true", spellcheck: "true" } },
-    onUpdate: ({ editor }) => { const contentJson = editor.getJSON(); saver.change({ ...saver.draft, contentJson }); setWords(countWords(plainText(contentJson))); }
+    // Viewers never save: StarterKit's trailing-node plugin can still change the document on load.
+    onUpdate: ({ editor }) => { if (!editor.isEditable) return; const contentJson = editor.getJSON(); saver.change({ ...saver.draft, contentJson }); setWords(countWords(plainText(contentJson))); }
   });
   useEffect(() => { editor?.setEditable(Boolean(editable)); }, [editor, editable]);
   useEffect(() => {
